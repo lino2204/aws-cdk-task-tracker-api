@@ -1,0 +1,36 @@
+# CDK
+cdk.out/
+*.d.ts
+*.js
+!jest.config.js
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.venv/
+venv/
+env/
+*.egg
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# AWS
+.aws-sam/
+*.pem
+
+# Environment
+.env
+.env.local
