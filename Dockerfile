@@ -3,7 +3,7 @@
 # This image is for LOCAL DEVELOPMENT only (running cdk synth/deploy, pytest, flake8) —
 # it is not what gets deployed to AWS; Lambda code is packaged separately by CDK itself.
 
-FROM node:20-slim
+FROM node:22-slim
 
 # --- System deps: Python + build tools ---
 RUN apt-get update && apt-get install -y --no-install-recommends \
