@@ -67,6 +67,8 @@ This repo is a hands-on demonstration of:
 .
 ├── .github/
 │   ├── CODEOWNERS                  # Automatic PR review assignment
+│   ├── dependabot.yml              # Weekly automated dependency & action updates
+│   ├── pull_request_template.md    # Standardized checklist for PRs
 │   └── workflows/
 │       └── ci.yml                  # GitHub Actions CI (flake8, pytest, cdk synth)
 ├── app.py                          # CDK app entrypoint
