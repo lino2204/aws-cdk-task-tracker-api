@@ -103,6 +103,33 @@ def test_create_task_invalid_json_returns_400(dynamo_env):
     assert "Invalid JSON body" in json.loads(response["body"])["message"]
 
 
+def test_create_task_invalid_status_returns_400(dynamo_env):
+    mod = _load_handler("create_task")
+    event = {"body": json.dumps({"title": "Bad status", "status": "in_progress"})}
+
+    response = mod.handler(event, None)
+
+    assert response["statusCode"] == 400
+    assert "'status' must be one of: pending, done" in json.loads(response["body"])["message"]
+
+
+def test_create_task_whitespace_or_non_string_title_returns_400(dynamo_env):
+    mod = _load_handler("create_task")
+
+    for bad_title in ("   ", 123, ["list"]):
+        response = mod.handler({"body": json.dumps({"title": bad_title})}, None)
+        assert response["statusCode"] == 400
+        assert "'title' is required" in json.loads(response["body"])["message"]
+
+
+def test_create_task_non_object_json_returns_400(dynamo_env):
+    mod = _load_handler("create_task")
+    response = mod.handler({"body": json.dumps(["not", "an", "object"])}, None)
+
+    assert response["statusCode"] == 400
+    assert "JSON body must be an object" in json.loads(response["body"])["message"]
+
+
 # ---------------------------------------------------------------------------
 # get_task
 # ---------------------------------------------------------------------------
@@ -198,6 +225,7 @@ def test_update_task_updates_title_and_status(dynamo_env):
     assert updated["task_id"] == "task-456"
     assert updated["title"] == "New title"
     assert updated["status"] == "done"
+    assert "updated_at" in updated
 
 
 def test_update_task_nonexistent_returns_404(dynamo_env):
@@ -245,6 +273,42 @@ def test_update_task_missing_id_returns_400(dynamo_env):
     response = mod.handler(event, None)
 
     assert response["statusCode"] == 400
+
+
+def test_update_task_invalid_status_returns_400(dynamo_env):
+    mod = _load_handler("update_task")
+    event = {
+        "pathParameters": {"id": "task-456"},
+        "body": json.dumps({"status": "archived"}),
+    }
+    response = mod.handler(event, None)
+
+    assert response["statusCode"] == 400
+    assert "'status' must be one of: pending, done" in json.loads(response["body"])["message"]
+
+
+def test_update_task_empty_or_non_string_title_returns_400(dynamo_env):
+    mod = _load_handler("update_task")
+    for bad_title in ("   ", 42):
+        event = {
+            "pathParameters": {"id": "task-456"},
+            "body": json.dumps({"title": bad_title}),
+        }
+        response = mod.handler(event, None)
+        assert response["statusCode"] == 400
+        assert "'title' must be a non-empty string" in json.loads(response["body"])["message"]
+
+
+def test_update_task_non_object_json_returns_400(dynamo_env):
+    mod = _load_handler("update_task")
+    event = {
+        "pathParameters": {"id": "task-456"},
+        "body": json.dumps(["array"]),
+    }
+    response = mod.handler(event, None)
+
+    assert response["statusCode"] == 400
+    assert "JSON body must be an object" in json.loads(response["body"])["message"]
 
 
 # ---------------------------------------------------------------------------

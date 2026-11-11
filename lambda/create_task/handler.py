@@ -9,6 +9,8 @@ import boto3
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(os.environ["TABLE_NAME"])
 
+VALID_STATUSES = ("pending", "done")
+
 
 def handler(event, context):
     try:
@@ -16,14 +18,25 @@ def handler(event, context):
     except (json.JSONDecodeError, TypeError):
         return _response(400, {"message": "Invalid JSON body"})
 
+    if not isinstance(body, dict):
+        return _response(400, {"message": "JSON body must be an object"})
+
     title = body.get("title")
-    if not title:
-        return _response(400, {"message": "'title' is required"})
+    if not isinstance(title, str) or not title.strip():
+        return _response(
+            400, {"message": "'title' is required and must be a non-empty string"}
+        )
+
+    status = body.get("status", "pending")
+    if status not in VALID_STATUSES:
+        return _response(
+            400, {"message": "'status' must be one of: pending, done"}
+        )
 
     item = {
         "task_id": str(uuid.uuid4()),
-        "title": title,
-        "status": body.get("status", "pending"),
+        "title": title.strip(),
+        "status": status,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
 
