@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # --- AWS CDK CLI (global npm install) ---
-RUN npm install -g aws-cdk@2.150.0
+RUN npm install -g aws-cdk@2.275.0
 
 WORKDIR /app
 
