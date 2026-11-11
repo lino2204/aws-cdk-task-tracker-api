@@ -38,11 +38,11 @@ flowchart LR
 
     DDB[("Amazon DynamoDB (tasks table)")]
 
-    L1 -- "PutItem (write data)" --> DDB
-    L2 -- "Scan (read data)" --> DDB
-    L3 -- "GetItem (read data)" --> DDB
-    L4 -- "UpdateItem (read/write)" --> DDB
-    L5 -- "dynamodb:DeleteItem only" --> DDB
+    L1 -- "dynamodb:PutItem" --> DDB
+    L2 -- "dynamodb:Scan" --> DDB
+    L3 -- "dynamodb:GetItem" --> DDB
+    L4 -- "dynamodb:UpdateItem" --> DDB
+    L5 -- "dynamodb:DeleteItem" --> DDB
 ```
 
 **Stack:**

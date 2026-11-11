@@ -24,47 +24,44 @@ class TaskApiStack(Stack):
 
         routes = [
             # POST /tasks -> create_task
-            # Needs to write a new item -> grant_write_data only.
+            # Only needs PutItem to insert a new task.
             RouteConfig(
                 method="POST",
                 path_part=None,  # collection-level route: /tasks
                 handler_name="create_task",
                 lambda_dir=os.path.join(LAMBDA_ROOT, "create_task"),
-                grant=lambda table, fn: table.grant_write_data(fn),
+                grant=lambda table, fn: table.grant(fn, "dynamodb:PutItem"),
             ),
             # GET /tasks -> list_tasks
-            # Needs to Scan the table -> grant_read_data only.
+            # Only needs Scan to list tasks in the table.
             RouteConfig(
                 method="GET",
                 path_part=None,  # collection-level route: /tasks
                 handler_name="list_tasks",
                 lambda_dir=os.path.join(LAMBDA_ROOT, "list_tasks"),
-                grant=lambda table, fn: table.grant_read_data(fn),
+                grant=lambda table, fn: table.grant(fn, "dynamodb:Scan"),
             ),
             # GET /tasks/{id} -> get_task
-            # Needs a single GetItem -> grant_read_data only.
+            # Only needs GetItem to fetch a single task by key.
             RouteConfig(
                 method="GET",
                 path_part="id",  # item-level route: /tasks/{id}
                 handler_name="get_task",
                 lambda_dir=os.path.join(LAMBDA_ROOT, "get_task"),
-                grant=lambda table, fn: table.grant_read_data(fn),
+                grant=lambda table, fn: table.grant(fn, "dynamodb:GetItem"),
             ),
             # PUT /tasks/{id} -> update_task
-            # UpdateItem needs both read (ConditionExpression check) and
-            # write permissions -> grant_read_write_data.
+            # Only needs UpdateItem (which evaluates ConditionExpression and
+            # returns ALL_NEW attributes within the single UpdateItem call).
             RouteConfig(
                 method="PUT",
                 path_part="id",  # item-level route: /tasks/{id}
                 handler_name="update_task",
                 lambda_dir=os.path.join(LAMBDA_ROOT, "update_task"),
-                grant=lambda table, fn: table.grant_read_write_data(fn),
+                grant=lambda table, fn: table.grant(fn, "dynamodb:UpdateItem"),
             ),
             # DELETE /tasks/{id} -> delete_task
-            # Only needs DeleteItem — scoped narrower than grant_write_data,
-            # which would also include PutItem/UpdateItem this function
-            # never uses. This is the clearest least-privilege example
-            # in the whole stack.
+            # Only needs DeleteItem to remove a task by key.
             RouteConfig(
                 method="DELETE",
                 path_part="id",  # item-level route: /tasks/{id}

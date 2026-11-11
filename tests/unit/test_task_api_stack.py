@@ -108,6 +108,41 @@ def test_delete_task_policy_is_scoped_not_wildcard(template):
     assert delete_policy_found, "Expected a policy statement granting dynamodb:DeleteItem"
 
 
+@pytest.mark.parametrize(
+    "fn_logical_prefix,expected_action",
+    [
+        ("CreateTaskFn", "dynamodb:PutItem"),
+        ("ListTasksFn", "dynamodb:Scan"),
+        ("GetTaskFn", "dynamodb:GetItem"),
+        ("UpdateTaskFn", "dynamodb:UpdateItem"),
+        ("DeleteTaskFn", "dynamodb:DeleteItem"),
+    ],
+)
+def test_each_lambda_policy_grants_exact_dynamodb_action(
+    template, fn_logical_prefix, expected_action
+):
+    """
+    Verify action-level least privilege across all 5 CRUD functions:
+    each Lambda's IAM policy must grant ONLY the single DynamoDB action
+    it actually calls.
+    """
+    policies = template.find_resources("AWS::IAM::Policy")
+
+    matched_actions = []
+    for policy_id, policy in policies.items():
+        if fn_logical_prefix not in policy_id:
+            continue
+        statements = policy["Properties"]["PolicyDocument"]["Statement"]
+        for statement in statements:
+            actions = statement.get("Action")
+            if actions is None:
+                continue
+            actions_list = actions if isinstance(actions, list) else [actions]
+            matched_actions.extend(actions_list)
+
+    assert matched_actions == [expected_action]
+
+
 def test_no_iam_policy_uses_wildcard_dynamodb_actions(template):
     """
     Broader safety net: across ALL IAM policies in the stack, none
