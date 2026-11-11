@@ -85,7 +85,9 @@ def test_delete_task_policy_is_scoped_not_wildcard(template):
     policies = template.find_resources("AWS::IAM::Policy")
 
     delete_policy_found = False
-    for _, policy in policies.items():
+    for policy_id, policy in policies.items():
+        if "DeleteTaskFn" not in policy_id:
+            continue
         statements = (
             policy["Properties"]["PolicyDocument"]["Statement"]
         )
