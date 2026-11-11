@@ -103,7 +103,8 @@ This repo is a hands-on demonstration of:
   "task_id": "uuid",
   "title": "string",
   "status": "pending | done",
-  "created_at": "ISO-8601 timestamp"
+  "created_at": "ISO-8601 timestamp",
+  "updated_at": "ISO-8601 timestamp (present after update)"
 }
 ```
 
